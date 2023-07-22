@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="ADPLATAYACCESORIOModel1" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+  <EntityType Name="Categoria">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Nombre" Type="String" MaxLength="100" FixedLength="false" Unicode="true" Nullable="false" />
+    <NavigationProperty Name="Producto" Relationship="ADPLATAYACCESORIOModel1.FK__Producto__Catego__398D8EEE" FromRole="Categoria" ToRole="Producto" />
+  </EntityType>
+  <EntityType Name="Usuario">
+    <Key>
+      <PropertyRef Name="ID" />
+    </Key>
+    <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Nombre" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+    <Property Name="Apellido" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+    <Property Name="Email" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+    <Property Name="Contraseña" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+    <NavigationProperty Name="Carrito" Relationship="ADPLATAYACCESORIOModel1.FK__Carrito__Usuario__440B1D61" FromRole="Usuario" ToRole="Carrito" />
+  </EntityType>
+  <EntityContainer Name="ADPLATAYACCESORIOEntitie" annotation:LazyLoadingEnabled="true">
+    <EntitySet Name="Categoria" EntityType="Self.Categoria" />
+    <EntitySet Name="Usuario" EntityType="Self.Usuario" />
+    <EntitySet Name="Carrito" EntityType="ADPLATAYACCESORIOModel1.Carrito" />
+    <AssociationSet Name="FK__Carrito__Usuario__440B1D61" Association="ADPLATAYACCESORIOModel1.FK__Carrito__Usuario__440B1D61">
+      <End Role="Usuario" EntitySet="Usuario" />
+      <End Role="Carrito" EntitySet="Carrito" />
+    </AssociationSet>
+    <EntitySet Name="Producto" EntityType="ADPLATAYACCESORIOModel1.Producto" />
+    <AssociationSet Name="FK__Carrito__Product__44FF419A" Association="ADPLATAYACCESORIOModel1.FK__Carrito__Product__44FF419A">
+      <End Role="Producto" EntitySet="Producto" />
+      <End Role="Carrito" EntitySet="Carrito" />
+    </AssociationSet>
+    <AssociationSet Name="FK__Producto__Catego__398D8EEE" Association="ADPLATAYACCESORIOModel1.FK__Producto__Catego__398D8EEE">
+      <End Role="Categoria" EntitySet="Categoria" />
+      <End Role="Producto" EntitySet="Producto" />
+    </AssociationSet>
+  </EntityContainer>
+  <EntityType Name="Carrito">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="UsuarioId" Type="Int32" />
+    <Property Name="ProductoId" Type="Int32" />
+    <Property Name="Cantidad" Type="Int32" />
+    <Property Name="PrecioUnitario" Type="Decimal" Precision="10" Scale="2" />
+    <NavigationProperty Name="Usuario" Relationship="ADPLATAYACCESORIOModel1.FK__Carrito__Usuario__440B1D61" FromRole="Carrito" ToRole="Usuario" />
+    <NavigationProperty Name="Producto" Relationship="ADPLATAYACCESORIOModel1.FK__Carrito__Product__44FF419A" FromRole="Carrito" ToRole="Producto" />
+  </EntityType>
+  <Association Name="FK__Carrito__Usuario__440B1D61">
+    <End Type="ADPLATAYACCESORIOModel1.Usuario" Role="Usuario" Multiplicity="0..1" />
+    <End Type="ADPLATAYACCESORIOModel1.Carrito" Role="Carrito" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Usuario">
+        <PropertyRef Name="ID" />
+      </Principal>
+      <Dependent Role="Carrito">
+        <PropertyRef Name="UsuarioId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <EntityType Name="Producto">
+    <Key>
+      <PropertyRef Name="Id" />
+    </Key>
+    <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+    <Property Name="Nombre" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+    <Property Name="Precio" Type="Decimal" Nullable="false" Precision="10" Scale="2" />
+    <Property Name="Detalle" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+    <Property Name="CategoriaId" Type="Int32" Nullable="false" />
+    <Property Name="Coleccion" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+    <Property Name="ImgUrl" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+    <NavigationProperty Name="Carrito" Relationship="ADPLATAYACCESORIOModel1.FK__Carrito__Product__44FF419A" FromRole="Producto" ToRole="Carrito" />
+    <NavigationProperty Name="Categoria" Relationship="ADPLATAYACCESORIOModel1.FK__Producto__Catego__398D8EEE" FromRole="Producto" ToRole="Categoria" />
+  </EntityType>
+  <Association Name="FK__Carrito__Product__44FF419A">
+    <End Type="ADPLATAYACCESORIOModel1.Producto" Role="Producto" Multiplicity="0..1" />
+    <End Type="ADPLATAYACCESORIOModel1.Carrito" Role="Carrito" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Producto">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Carrito">
+        <PropertyRef Name="ProductoId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FK__Producto__Catego__398D8EEE">
+    <End Type="ADPLATAYACCESORIOModel1.Categoria" Role="Categoria" Multiplicity="1" />
+    <End Type="ADPLATAYACCESORIOModel1.Producto" Role="Producto" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Categoria">
+        <PropertyRef Name="Id" />
+      </Principal>
+      <Dependent Role="Producto">
+        <PropertyRef Name="CategoriaId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+</Schema>

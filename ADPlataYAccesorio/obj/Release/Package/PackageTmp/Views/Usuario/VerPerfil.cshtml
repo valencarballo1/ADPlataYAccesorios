@@ -1,0 +1,128 @@
+﻿@model ADPlataYAccesorio.Models.Usuario
+
+@{
+    ViewBag.Title = "VerPerfil";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    <style>
+        .container-p {
+            margin-top: 100px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        h4 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #eb636b;
+            font-size: 24px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group p {
+            color: #333;
+        }
+
+        .btn {
+            background-color: #eb636b;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+        }
+
+            .btn:hover {
+                background-color: #d1464c;
+            }
+    </style>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
+</head>
+<body>
+    <div class="container container-p mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">Perfil de Usuario</h4>
+                        <hr />
+                        <div class="form-group">
+                            <label class="font-weight-bold">Nombre:</label>
+                            <p>@Model.Nombre</p>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold">Apellido:</label>
+                            <p>@Model.Apellido</p>
+                        </div>
+                        <div class="form-group">
+                            <label class="font-weight-bold">Email:</label>
+                            <p>@Model.Email</p>
+                        </div>
+                        @if (Model.ID == 1)
+                        {
+                            <a href="@Url.Action("Agregar", "Producto")" class="btn btn-primary">Crear Producto</a>
+                        }
+                        @if (Model.ID == 1)
+                        {
+                            <a href="@Url.Action("Editar", "Producto")" class="btn btn-primary">Editar Producto</a>
+                        }
+                        <button class="btn btn-primary btnCerrarSesion">Cerrar sesión</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+    $('.btnCerrarSesion').click(function () {
+        CerrarSesion();
+    });
+
+    function CerrarSesion() {
+    $.ajax({
+        url: '@Url.Action("CerrarSesion", "Usuario")',
+        type: 'GET',
+        data: { },
+        success: function (response) {
+            if (response.success) {
+                // Aquí puedes realizar acciones adicionales después de agregar el producto al carrito
+                console.log('Entro');
+                cargarCantidades();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Gracias por visitarnos! Hasta la proxima',
+                    showConfirmButton: false,
+                    timer: 1000
+                }).then(function() {
+                                // Redirigir a la vista Producto/VerTodos después de 5 segundos
+                                window.location.href = '@Url.Action("Index", "Index")';
+                            });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: response.message
+                });
+            }
+        },
+    });
+    }
+
+</script>

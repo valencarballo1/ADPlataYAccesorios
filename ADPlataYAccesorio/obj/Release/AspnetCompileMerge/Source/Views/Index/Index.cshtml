@@ -1,0 +1,77 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+<style>
+    /* Estilos del banner */
+    .banner {
+        background-color: #f8f8f8;
+        padding: 20px;
+        text-align: center;
+    }
+
+        .banner h1 {
+            font-size: 30px;
+            color: #333;
+        }
+
+        .banner p {
+            font-size: 18px;
+            color: #666;
+        }
+
+    /* Estilos del carrusel */
+    .carousel-item {
+        text-align: center;
+    }
+
+        .carousel-item img {
+            max-width: 100%;
+            max-height: 200px;
+            margin: auto;
+        }
+
+        .carousel-item h4 {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .carousel-item p {
+            color: #666;
+        }
+</style>
+
+<div class="banner">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6 col-6">
+                <h1>Descubre nuestra colección de anillos</h1>
+                <p>Encuentra el anillo perfecto para cada ocasión.</p>
+                <a href="@Url.Action("VerProductosPorCategoria", "Producto", new { categoriaId = 3 })" class="btn btn-primary">Ver más</a>
+            </div>
+            <div class="col-md-6 col-6">
+                <img class="img-fluid" src="https://cdn.shopify.com/s/files/1/0614/8617/0283/files/anillos_900x.jpg?v=1679300070" alt="Banner de anillos">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="thin-banner">
+    <img class="img-fluid" src="https://cdn.shopify.com/s/files/1/0614/8617/0283/files/banner_producto_23_38e4fad6-1d8e-4654-b33e-282db72f522a_1850x.jpg?v=1675076828" alt="División de banner">
+</div>
+
+<div class="banner">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6 col-6">
+                <img class="img-fluid" src="https://cdn.shopify.com/s/files/1/0614/8617/0283/files/colgantes_900x.jpg?v=1679300163" alt="Banner de anillos">
+            </div>
+            <div class="col-md-6 col-6">
+                <h1>Descubre nuestra colección de colgantes</h1>
+                <p>Encuentra el colgante perfecto para cada ocasión.</p>
+                <a href="@Url.Action("VerProductosPorCategoria", "Producto", new { categoriaId = 4 })" class="btn btn-primary">Ver más</a>
+            </div>
+        </div>
+    </div>
+</div>

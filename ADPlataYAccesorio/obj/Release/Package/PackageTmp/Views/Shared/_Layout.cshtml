@@ -1,0 +1,156 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css" />
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" /> 
+    <title>@ViewBag.Title - ADPLATAYACCESORIOS</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body>
+    <style>
+
+        * {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #f8f8f8;
+            padding: 10px;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+        }
+
+        .navbar-nav {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        .nav-item {
+            margin-right: 10px;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .navbar-icons {
+            display: flex;
+        }
+
+        .navbar-icon {
+            margin-left: 10px;
+            color: #333;
+        }
+
+        .backGroundNav {
+            background-color: #eb636b;
+        }
+
+        .colorAItems {
+            color: #000000;
+        }
+    </style>
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark backGroundNav">
+        <div class="container">
+
+            <nav class="navbar navbar-expand-md backGroundNav w-100">
+                <a class="navbar-brand" href="@Url.Action("Index", "Index")">ADPLATAYACCESORIOS</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle colorAItems" href="#" id="productosDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Productos
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="productosDropdown">
+                                <a class="dropdown-item" href="@Url.Action("VerTodos", "Producto")">Ver Todos</a>
+                                <a class="dropdown-item" href="@Url.Action("VerProductosPorCategoria", "Producto", new { categoriaId = 1 })">Anillos</a>
+                                <a class="dropdown-item" href="@Url.Action("VerProductosPorCategoria", "Producto", new { categoriaId = 2 })">Pulseras & Brazaletes</a>
+                                <a class="dropdown-item" href="@Url.Action("VerProductosPorCategoria", "Producto", new { categoriaId = 3 })">Aros</a>
+                                <a class="dropdown-item" href="@Url.Action("VerProductosPorCategoria", "Producto", new { categoriaId = 4 })">Colgantes & Collares</a>
+                            </div>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link colorAItems" href="@Url.Action("VerCarrito", "Producto")">
+                                <i class="bi bi-cart"></i>
+                                <span id="cartItemCount" class="badge badge-pill badge-danger"></span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link colorAItems" href="@Url.Action("VerPerfil", "Usuario")">
+                                <i class="bi bi-person-vcard-fill"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+
+    </nav>
+
+    <div class="body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year AD Plata y Accesorios</p>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script>
+    $(document).ready(function () {
+        cargarCantidades();
+    });
+
+    function cargarCantidades() {
+        $.ajax({
+            url: '@Url.Action("Carrito", "Producto")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                actualizarContadorCarrito(data); // Actualizar el contador del carrito
+            },
+            error: function () {
+                //alert('Ocurrió un error al cargar el carrito.');
+                console.log("Iniciar Sesion");
+            }
+        });
+    }
+
+        function actualizarContadorCarrito(carrito) {
+            var totalCantidad = 0;
+
+            carrito.forEach(function (producto) {
+                totalCantidad += producto.Cantidad;
+            });
+
+            $('#cartItemCount').text(totalCantidad);
+        }
+    </script>
+</body>
+</html>

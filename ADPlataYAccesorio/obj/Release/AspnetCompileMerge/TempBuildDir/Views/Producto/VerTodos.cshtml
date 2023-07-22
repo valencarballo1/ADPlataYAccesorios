@@ -1,0 +1,193 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "VerTodos";
+}
+
+@{
+    ViewBag.Title = "Ver Todos";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Título de la página</title>
+    <style>
+        .detalle-img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .container-vt {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #eb636b;
+            font-size: 24px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .card-text {
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .btn {
+            background-color: #eb636b;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+        }
+
+            .btn:hover {
+                background-color: #d1464c;
+            }
+    </style>
+</head>
+<body>
+    <div class="container container-vt">
+        <div class="row">
+            <div class="col-md-12">
+                <h1 class="text-center">Todos los productos</h1>
+            </div>
+        </div>
+        <div class="row row-cols-1 row-cols-md-4 g-4" id="productos-container">
+            <!-- Los productos se cargarán dinámicamente aquí -->
+        </div>
+    </div>
+
+    <div class="modal fade" id="detalleModal" tabindex="-1" role="dialog" aria-labelledby="detalleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detalleModalLabel">Detalle del Producto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="detalleProducto"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+<script>
+    $(document).ready(function() {
+        cargarProductos();
+    });
+
+    function cargarProductos() {
+        $.ajax({
+            url: '@Url.Action("VerTodosLosProductos", "Producto")',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                mostrarProductos(data);
+            },
+            error: function() {
+                alert('Ocurrió un error al cargar los productos.');
+            }
+        });
+    }
+
+    function mostrarProductos(productos)    {
+        var container = $('#productos-container');
+        container.empty();
+
+        productos.forEach(function (producto) {
+            var card = $('<div>').addClass('col-md-4 col-sm-6 col-6').append(
+                $('<div>').addClass('card mb-3').append(
+                    $('<img>').attr('src', producto.ImgUrl).addClass('card-img-top').attr('alt', producto.Nombre),
+                    $('<div>').addClass('card-body').append(
+                        $('<h5>').addClass('card-title text-center').text(producto.Nombre),
+                        $('<p>').addClass('card-text fs-5 fw-bold text-center').text('$' + producto.Precio),
+                        $('<div>').addClass('d-flex justify-content-start align-items-center flex-column flex-sm-row').append(
+                            $('<button>').addClass('btn btn-primary btn-ver-detalle').text('Ver Detalle').data('producto', producto),
+                            $('<button>').addClass('btn btn-primary btn-agregar-carrito').append(
+                                $('<i>').addClass('bi bi-cart-fill me-1')
+                            ).data('producto', producto)
+                        )
+                    )
+                )
+            );
+            container.append(card);
+        });
+
+        // Configurar evento click para mostrar el popup del detalle
+        $('.btn-ver-detalle').click(function() {
+            var producto = $(this).data('producto');
+            mostrarDetalle(producto);
+        });
+
+        $('.btn-agregar-carrito').click(function () {
+            var producto = $(this).data('producto');
+            agregarProductoAlCarrito(producto);
+        });
+    }
+
+
+    function mostrarDetalle(producto) {
+        var detalleContainer = $('#detalleProducto');
+        detalleContainer.empty();
+
+        var detalle = $('<div>').addClass('detalle-container').append(
+            $('<img>').attr('src', producto.ImgUrl).addClass('detalle-img').attr('alt', producto.Nombre),
+            $('<h5>').addClass('detalle-nombre').text(producto.Nombre),
+            $('<p>').addClass('detalle-precio').text('$' + producto.Precio),
+            $('<p>').addClass('detalle-detalles').text('Detalle: ' + (producto.Detalle || 'N/A'))
+        );
+
+        detalleContainer.append(detalle);
+
+        $('#detalleModal').modal('show');
+    }
+
+    function agregarProductoAlCarrito(producto) {
+    $.ajax({
+        url: '@Url.Action("AgregarProductoAlCarrito", "Producto")',
+        type: 'POST',
+        data: { producto: producto },
+        success: function (response) {
+            if (response.success) {
+                // Aquí puedes realizar acciones adicionales después de agregar el producto al carrito
+                console.log('Producto agregado al carrito');
+                cargarCantidades();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Producto agregado al carrito',
+                    showConfirmButton: false,
+                    timer: 1000
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: response.message,
+                    footer: '<a href="@Url.Action("InicioSesion", "Usuario")">Iniciar sesion</a>'
+                });
+            }
+        },
+    });
+    }
+
+</script>

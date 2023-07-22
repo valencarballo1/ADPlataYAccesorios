@@ -1,0 +1,159 @@
+﻿@{
+    ViewBag.Title = "Editar";
+}
+<style>
+    .detalle-img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .container-vt {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #eb636b;
+        font-size: 24px;
+    }
+
+    .card-title {
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .card-text {
+        font-size: 16px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .btn {
+        background-color: #eb636b;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+        display: inline-block;
+        margin-top: 20px;
+        text-decoration: none;
+    }
+
+        .btn:hover {
+            background-color: #d1464c;
+        }
+</style>
+<h2>Editar</h2>
+<div id="productos-container" class="row container-vt"></div>
+
+<script>
+    $(document).ready(function () {
+        cargarProductos();
+    });
+
+    function cargarProductos() {
+        $.ajax({
+            url: '@Url.Action("VerTodosLosProductos", "Producto")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                mostrarProductos(data);
+            },
+            error: function () {
+                alert('Ocurrió un error al cargar los productos.');
+            }
+        });
+    }
+
+    function mostrarProductos(productos) {
+        var container = $('#productos-container');
+        container.empty();
+
+        productos.forEach(function (producto) {
+            var card = $('<div>').addClass('col-md-4 col-sm-6 col-6 col-xl-3').append(
+                $('<div>').addClass('card mb-3').append(
+                    $('<img>').attr('src', producto.ImgUrl).addClass('card-img-top').attr('alt', producto.Nombre),
+                    $('<div>').addClass('card-body').append(
+                        $('<h5>').addClass('card-title text-center').text(producto.Nombre),
+                        $('<p>').addClass('card-text fs-5 fw-bold text-center').text(producto.Precio),
+                        $('<p>').addClass('card-text fs-5 fw-bold text-center').text(producto.ImgUrl),
+                        $('<div>').addClass('d-flex justify-content-start align-items-center flex-column flex-sm-row').append(
+                            $('<button>').addClass('btn btn-primary btn-editar').text('Editar').data('producto', producto).click(function () {
+                                editarProducto(card);
+                            }),
+                            $('<button>').addClass('btn btn-primary btn-guardar-cambios').append(
+                                $('<i>').addClass('bi bi-save me-1')
+                            ).click(function () {
+                                guardarCambios(producto);
+                            })
+                        )
+                    )
+                )
+            );
+
+            container.append(card);
+        });
+    }
+
+    function editarProducto(card) {
+        // Obtener el objeto producto desde el data attribute de la card
+        var producto = card.find('.btn-editar').data('producto');
+
+        // Obtener los elementos de la card
+        var titleElement = card.find('.card-title');
+        var priceElement = card.find('.card-text');
+
+        // Convertir los elementos en campos editables
+        titleElement.attr('contenteditable', 'true');
+        priceElement.attr('contenteditable', 'true');
+
+        // Agregar clase para indicar que los campos están en modo de edición
+        card.addClass('editing');
+
+        // Actualizar el objeto producto con los nuevos valores
+        titleElement.on('input', function () {
+            producto.Nombre = titleElement.text().trim();
+        });
+
+        priceElement.on('input', function () {
+            var nuevoPrecio = parseInt(priceElement.text().trim(), 10);
+            if (!isNaN(nuevoPrecio)) {
+                producto.Precio = nuevoPrecio;
+            }
+        });
+    }
+
+    function guardarCambios(producto) {
+        // Realizar la solicitud AJAX para guardar los cambios
+        $.ajax({
+            url: '/Producto/AgregarOModificar',
+            method: 'POST',
+            data: JSON.stringify(producto), // Convertir el objeto a JSON
+            contentType: 'application/json', // Establecer el tipo de contenido como JSON
+            success: function (response) {
+                if (response === 'OK') {
+                    // Éxito al guardar los cambios
+                    Swal.fire('¡Éxito!', 'Los cambios se han guardado correctamente.', 'success');
+
+                    // Quitar clase de edición y desactivar los campos editables
+                    card.removeClass('editing');
+                    titleElement.removeAttr('contenteditable');
+                    priceElement.removeAttr('contenteditable');
+                } else {
+                    // Error al guardar los cambios
+                    Swal.fire('Error', 'No se pudieron guardar los cambios.', 'error');
+                }
+            },
+            error: function () {
+                Swal.fire('Error', 'Ocurrió un error al enviar la solicitud.', 'error');
+            }
+        });
+    }
+</script>

@@ -1,0 +1,185 @@
+﻿@{
+    var productos = ViewBag.Productos as List<ADPlataYAccesorio.Repository.ProductoRepository.ProductoView>;
+}
+@using Newtonsoft.Json
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Título de la página</title>
+    <style>
+        .detalle-img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .container-p {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #eb636b;
+            font-size: 24px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .card-text {
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .btn {
+            background-color: #eb636b;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+        }
+
+            .btn:hover {
+                background-color: #d1464c;
+            }
+
+        .modal-title {
+            color: #eb636b;
+            font-size: 24px;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            border-top: none;
+            padding: 20px;
+            text-align: right;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container container-p">
+        <div class="row">
+            <div class="col-md-12">
+                <h1 class="text-center">@productos.FirstOrDefault().CategoriaNombre</h1>
+            </div>
+        </div>
+        <div class="row row-cols-1 row-cols-md-4 g-4">
+            @foreach (var producto in productos)
+            {
+                <div class="col-md-4 col-sm-6 col-6">
+                    <div class="card mb-3">
+                        <img src="@producto.ImgUrl" class="card-img-top detalle-img" alt="@producto.Nombre">
+                        <div class="card-body">
+                            <h5 class="card-title">@producto.Nombre</h5>
+                            <p class="card-text fs-5 fw-bold text-center">$@producto.Precio</p>
+                            <button class="btn btn-primary btn-ver-detalle" data-producto="@JsonConvert.SerializeObject(producto)">Ver Detalle</button>
+                            <button class="btn btn-primary btn-agregar-carrito" data-producto='@JsonConvert.SerializeObject(producto)'>
+                                <i class="bi bi-cart-fill me-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Resto del código de la vista -->
+
+    <div class="modal fade" id="detalleModal" tabindex="-1" role="dialog" aria-labelledby="detalleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detalleModalLabel">Detalle del Producto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="detalleProducto"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+<script>
+    $(document).ready(function () {
+        $('.btn-agregar-carrito').click(function () {
+            var producto = $(this).data('producto');
+            agregarProductoAlCarrito(producto);
+        });
+
+        $('.btn-ver-detalle').click(function () {
+            var producto = $(this).data('producto');
+            mostrarDetalle(producto);
+        });
+    });
+
+
+    function mostrarDetalle(producto) {
+        var detalleContainer = $('#detalleProducto');
+        detalleContainer.empty();
+
+        var detalle = $('<div>').addClass('detalle-container').append(
+            $('<img>').attr('src', producto.ImgUrl).addClass('detalle-img').attr('alt', producto.Nombre),
+            $('<h5>').addClass('detalle-nombre').text(producto.Nombre),
+            $('<p>').addClass('detalle-precio').text('$' + producto.Precio),
+            $('<p>').addClass('detalle-detalles').text('Detalle: ' + (producto.Detalle || 'N/A'))
+        );
+
+        detalleContainer.append(detalle);
+
+        $('#detalleModal').modal('show');
+    }
+
+    function agregarProductoAlCarrito(producto) {
+    $.ajax({
+        url: '@Url.Action("AgregarProductoAlCarrito", "Producto")',
+        type: 'POST',
+        data: { producto: producto },
+        success: function (response) {
+            if (response.success) {
+                // Aquí puedes realizar acciones adicionales después de agregar el producto al carrito
+                console.log('Producto agregado al carrito');
+                cargarCantidades();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Producto agregado al carrito',
+                    showConfirmButton: false,
+                    timer: 1000
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: response.message,
+                    footer: '<a href="@Url.Action("InicioSesion", "Usuario")">Iniciar sesion</a>'
+                });
+            }
+        },
+    });
+    }
+
+</script>

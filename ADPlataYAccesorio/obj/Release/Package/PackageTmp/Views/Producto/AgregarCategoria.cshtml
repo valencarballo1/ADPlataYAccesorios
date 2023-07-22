@@ -1,0 +1,50 @@
+﻿@model ADPlataYAccesorio.Models.Categoria
+
+@{
+    ViewBag.Title = "Agregar Categoría";
+}
+
+<h2>Agregar Categoría</h2>
+
+<form id="categoriaForm">
+    <div class="form-group">
+        @Html.LabelFor(model => model.Nombre)
+        @Html.TextBoxFor(model => model.Nombre, new { @class = "form-control" })
+    </div>
+
+    <div class="form-group">
+        <button type="button" class="btn btn-primary" onclick="agregarCategoria()">Guardar</button>
+    </div>
+</form>
+
+<script>
+    function agregarCategoria() {
+        var categoria = {
+            Nombre: $("#Nombre").val()
+        };
+
+        $.ajax({
+            url: '@Url.Action("AddCagetoria", "Producto")',
+            type: 'POST',
+            data: JSON.stringify(categoria),
+            contentType: 'application/json',
+            success: function (response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Categoría agregada',
+                    text: 'La categoría se ha agregado correctamente.',
+                    onClose: function () {
+                        window.location.href = '@Url.Action("Index", "Index")';
+                    }
+                });
+            },
+            error: function (xhr, status, error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al agregar categoría',
+                    text: 'Ha ocurrido un error al agregar la categoría. Por favor, intenta nuevamente.'
+                });
+            }
+        });
+    }
+</script>

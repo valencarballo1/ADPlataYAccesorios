@@ -1,0 +1,259 @@
+﻿@{
+    ViewBag.Title = "VerCarrito";
+}
+<style>
+    .container-cr {
+        margin-top: 100px;
+        /*max-width: 400px;*/
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #eb636b;
+        font-size: 24px;
+    }
+
+    .product-cell {
+        display: flex;
+        align-items: center;
+    }
+
+    .product-image {
+        max-width: 100px;
+        height: auto;
+        margin-right: 10px;
+    }
+
+    .product-info {
+        flex: 1;
+    }
+
+    .product-name {
+        margin-bottom: 5px;
+    }
+
+    .product-price {
+        color: #888;
+        font-size: 14px;
+    }
+
+    .quantity-cell {
+        display: flex;
+        align-items: center;
+    }
+
+    .quantity-container {
+        display: flex;
+        align-items: center;
+    }
+
+    .btn {
+        margin-right: 5px;
+    }
+
+    .importe-total {
+        border: none;
+        background-color: transparent;
+        padding: 0;
+        outline: none;
+    }
+</style>
+
+<div id="carrito" class="container-cr">
+    <h1>Carrito de compras</h1>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Los productos del carrito se cargarán dinámicamente aquí -->
+        </tbody>
+    </table>
+    <div class="d-flex align-items-center justify-content-center p-3">
+        <label for="importeTotalInput">Importe total:</label>
+        <input type="text" id="importeTotalInput" class="importe-total" readonly>
+        <button class="btn btn-primary btn-finalizarCompra">Finalizar pedido</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        cargarCarrito();
+    });
+    var carritoData = [];
+
+    function cargarCarrito() {
+        $.ajax({
+            url: '@Url.Action("Carrito", "Producto")',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                mostrarCarrito(data);
+                mostrarImporteTotal(data);
+                llenarCarritoData(data);
+            },
+            error: function () {
+                alert('Ocurrió un error al cargar el carrito.');
+            }
+        });
+    }
+
+    function llenarCarritoData(carrito) {
+        carritoData = carrito;
+    }
+
+    function mostrarCarrito(carrito) {
+        var tbody = $('#carrito tbody');
+        tbody.empty();
+
+        if (carrito.length > 0) {
+            $.each(carrito, function (index, item) {
+                var row = $('<tr>').append(
+                    $('<td>').addClass('product-cell').append(
+                        $('<img>').attr('src', item.ImgUrl).addClass('product-image').attr('alt', item.Nombre),
+                        $('<div>').addClass('product-info').append(
+                            $('<h4>').addClass('product-name').text(item.Producto),
+                            $('<p>').addClass('product-price').text('$' + item.PrecioUnitario)
+                        )
+                    ),
+                    $('<td>').append(
+                        $('<div>').addClass('quantity-container').append(
+                            item.Cantidad >= 1
+                                ? $('<button>').addClass('btn btn-remove btn-danger').data('producto-id', item.ProductoId).html('<i class="bi bi-x"></i>')
+                                : '',
+                            $('<span>').addClass('cantidad h5').text(item.Cantidad),
+                            $('<button>').addClass('btn btn-add btn-primary').data('producto-id', item.ProductoId).html('<i class="bi bi-plus"></i>')
+                        )
+                    ),
+                    $('<td>').text('$' + item.PrecioUnitario)
+                );
+
+                tbody.append(row);
+            });
+        } else {
+            tbody.append($('<tr>').append($('<td colspan="4">').text('No hay productos en el carrito.')));
+        }
+    }
+
+    $(document).on('click', '.btn-add', function () {
+        var productId = $(this).data('producto-id');
+        console.log(productId);
+        aumentarCantidad(productId);
+    });
+
+    $(document).on('click', '.btn-remove', function () {
+        var productId = $(this).data('producto-id');
+        disminuirCantidad(productId);
+    });
+
+    $(document).on('click', '.btn-finalizarCompra', function () {
+        finalizarCompra(carritoData)
+     });
+
+
+    function mostrarImporteTotal(carrito) {
+        var importeTotal = calcularImporteTotal(carrito);
+        var importeTotalInput = document.getElementById('importeTotalInput');
+        importeTotalInput.value = '$' + importeTotal;
+    }
+
+    function calcularImporteTotal(carrito) {
+        var importeTotal = 0;
+
+        carrito.forEach(function (item) {
+            importeTotal += item.Cantidad * item.PrecioUnitario;
+        });
+        console.log(importeTotal)
+
+        return importeTotal;
+    }
+
+    function aumentarCantidad(productId) {
+        $.ajax({
+            url: '@Url.Action("AumentarCantidadCarrito", "Producto")',
+            type: 'POST',
+            data: { productId: productId },
+            success: function (result) {
+                if (result.success) {
+                    // Aquí puedes realizar acciones adicionales después de agregar el producto al carrito
+                    console.log('Producto agregado al carrito');
+                    cargarCarrito();
+                    cargarCantidades();
+                }
+            },
+            error: function () {
+                console.log('Error al agregar el producto al carrito');
+            }
+        });
+    }
+
+    function disminuirCantidad(productId) {
+        $.ajax({
+            url: '@Url.Action("DisminuirCantidad", "Producto")',
+            type: 'POST',
+            data: { productId: productId },
+            success: function (result) {
+                if (result.success) {
+                    // Aquí puedes realizar acciones adicionales después de agregar el producto al carrito
+                    console.log('Producto restado al carrito');
+                    cargarCarrito();
+                    cargarCantidades();
+                }
+            },
+            error: function () {
+                console.log('Error al restar el producto al carrito');
+            }
+        });
+    }
+
+    function eliminarProducto(productId) {
+        $.ajax({
+            url: '@Url.Action("eliminarProductoDelCarrito", "Producto")',
+            type: 'POST',
+            data: { productId: productId },
+            success: function (result) {
+                if (result.success) {
+                    // Aquí puedes realizar acciones adicionales después de agregar el producto al carrito
+                    console.log('Producto restado al carrito');
+                    cargarCarrito();
+                    cargarCantidades();
+                }
+            },
+            error: function () {
+                console.log('Error al restar el producto al carrito');
+            }
+        });
+    }
+
+    function finalizarCompra(carritoData) {
+        console.log(carritoData)
+        var mensaje = '¡Gracias por tu compra!\n\nDetalles del pedido\n\n';
+        var precioTotal = 0;
+
+        $.each(carritoData, function (index, item) {
+            var subtotal = item.Cantidad * item.PrecioUnitario;
+            precioTotal += subtotal;
+            mensaje += 'Producto: ' + item.Producto + '\n';
+            mensaje += 'Cantidad: ' + item.Cantidad + '\n';
+        });
+
+        mensaje += 'Precio total: $' + precioTotal.toFixed(2);
+
+        var numeroTelefono = '+5491132357664'; // Reemplaza con el número de teléfono al que quieres enviar el mensaje
+        var enlaceWhatsApp = 'https://api.whatsapp.com/send?phone=' + numeroTelefono + '&text=' + encodeURIComponent(mensaje);
+
+        window.open(enlaceWhatsApp);
+
+        $.each(carritoData, function (index, item) {
+            eliminarProducto(item.ProductoId);
+        });
+    }
+</script>
